@@ -46,9 +46,9 @@ public class Quote {
 
 	private double ema12;
 
-	private double ema26;
+	private double ema29;
 
-	private double ema9;
+	private double ema10;
 
 	private double macd;
 
@@ -162,20 +162,20 @@ public class Quote {
 		this.ema12 = ema12;
 	}
 
-	public double getEma26() {
-		return ema26;
+	public double getEma29() {
+		return ema29;
 	}
 
-	public void setEma26(double ema26) {
-		this.ema26 = ema26;
+	public void setEma29(double ema29) {
+		this.ema29 = ema29;
 	}
 
-	public double getEma9() {
-		return ema9;
+	public double getEma10() {
+		return ema10;
 	}
 
-	public void setEma9(double ema9) {
-		this.ema9 = ema9;
+	public void setEma10(double ema10) {
+		this.ema10 = ema10;
 	}
 
 	public double getMacd() {
@@ -269,7 +269,7 @@ public class Quote {
 	}
 
 	public void calculateMacd() {
-		this.macd = this.ema12 - this.ema26;
+		this.macd = this.ema12 - this.ema29;
 	}
 
 	public void calculateType() {
@@ -285,10 +285,10 @@ public class Quote {
 	}
 
 	public void calculateSignalMacd() {
-		if (this.ema9 == 0) {
+		if (this.ema10 == 0) {
 			this.position_macd = "";
 		} else {
-			if (this.ema9 > 0) {
+			if (this.ema10 > 0) {
 				this.position_macd = Signal.COMPRAR.toString();
 			} else {
 				this.position_macd = Signal.VENDER.toString();

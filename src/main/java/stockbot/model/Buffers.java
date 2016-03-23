@@ -11,11 +11,11 @@ public class Buffers {
 
 	private List<Double> averages;
 
-	private List<Double> ema9;
+	private List<Double> ema10;
 
 	private List<Double> ema12;
 
-	private List<Double> ema26;
+	private List<Double> ema29;
 
 	private List<Double> earnsAverage;
 
@@ -25,9 +25,9 @@ public class Buffers {
 		this.maxs = new ArrayList<Double>();
 		this.mins = new ArrayList<Double>();
 		this.averages = new ArrayList<Double>();
-		this.ema9 = new ArrayList<Double>();
+		this.ema10 = new ArrayList<Double>();
 		this.ema12 = new ArrayList<Double>();
-		this.ema26 = new ArrayList<Double>();
+		this.ema29 = new ArrayList<Double>();
 		this.earnsAverage = new ArrayList<Double>();
 		this.lossesAverage = new ArrayList<Double>();
 	}
@@ -77,19 +77,19 @@ public class Buffers {
 		this.averages = averages;
 	}
 
-	public List<Double> getEma9() {
-		return ema9;
+	public List<Double> getEma10() {
+		return ema10;
 	}
 
-	public void addEma9(Double ema9) {
-		this.ema9.add(ema9);
-		if (this.ema9.size() > 9) {
-			this.ema9.remove(0);
+	public void addEma9(Double ema10) {
+		this.ema10.add(ema10);
+		if (this.ema10.size() > 10) {
+			this.ema10.remove(0);
 		}
 	}
 
-	public void setEma9(List<Double> ema9) {
-		this.ema9 = ema9;
+	public void setEma10(List<Double> ema10) {
+		this.ema10 = ema10;
 	}
 
 	public List<Double> getEma12() {
@@ -107,19 +107,19 @@ public class Buffers {
 		this.ema12 = ema12;
 	}
 
-	public List<Double> getEma26() {
-		return ema26;
+	public List<Double> getEma29() {
+		return ema29;
 	}
 
-	public void addEma26(Double ema26) {
-		this.ema26.add(ema26);
-		if (this.ema26.size() > 26) {
-			this.ema26.remove(0);
+	public void addEma29(Double ema29) {
+		this.ema29.add(ema29);
+		if (this.ema29.size() > 29) {
+			this.ema29.remove(0);
 		}
 	}
 
-	public void setEma26(List<Double> ema26) {
-		this.ema26 = ema26;
+	public void setEma29(List<Double> ema29) {
+		this.ema29 = ema29;
 	}
 
 	public List<Double> getEarnsAverage() {

@@ -138,8 +138,8 @@ public class QuoteManualExtract {
 			buffers.addAverages(quote.getAverage());
 			buffers.addEarnsAverage(quote.getEarns_average());
 			buffers.addEma12(quote.getClose());
-			buffers.addEma26(quote.getClose());
-			buffers.addEma9(quote.getEma9());
+			buffers.addEma29(quote.getClose());
+			buffers.addEma9(quote.getEma10());
 			buffers.addLossesAverage(quote.getLosses_average());
 			buffers.addMaxs(quote.getHigh());
 			buffers.addMins(quote.getLow());
@@ -153,7 +153,7 @@ public class QuoteManualExtract {
 			buffers.addMaxs(quote.getHigh());
 			buffers.addMins(quote.getLow());
 			buffers.addEma12(quote.getClose());
-			buffers.addEma26(quote.getClose());
+			buffers.addEma29(quote.getClose());
 			if (buffers.getMaxs().size() >= 5) {
 				quote.setStochastic(getStochastic(getMax(buffers.getMaxs()), getMin(buffers.getMins()),
 						quote.getClose()));
@@ -169,13 +169,13 @@ public class QuoteManualExtract {
 			if (buffers.getEma12().size() >= 12) {
 				quote.setEma12(getAverage(buffers.getEma12(), 12));
 			}
-			if (buffers.getEma26().size() >= 26) {
-				quote.setEma26(getAverage(buffers.getEma26(), 26));
+			if (buffers.getEma29().size() >= 29) {
+				quote.setEma29(getAverage(buffers.getEma29(), 29));
 				quote.calculateMacd();
 				buffers.addEma9(quote.getMacd());
 			}
-			if (buffers.getEma9().size() >= 9) {
-				quote.setEma9(getAverage(buffers.getEma9(), 9));
+			if (buffers.getEma10().size() >= 10) {
+				quote.setEma10(getAverage(buffers.getEma10(), 10));
 			}
 			if (previousClose > 0.0D) {
 				double diff = quote.getClose() - previousClose;

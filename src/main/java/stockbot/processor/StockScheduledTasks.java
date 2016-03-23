@@ -14,15 +14,13 @@ public class StockScheduledTasks {
 	@Autowired
 	private QuoteManualExtract extractor;
 
-	/*
-	 * private String[] quoteNames = { "BME:ABE", "BME:ANA", "BME:ACX", "BME:ACS", "BME:AENA",
-	 * "BME:AENA", "BME:AMS", "BME:MTS", "BME:POP", "BME:SAB", "BME:SAN", "BME:BKIA", "BME:BKT",
-	 * "BME:BBVA", "BME:CABK", "BME:DIA", "BME:ENG", "BME:ELE", "BME:FCC", "BME:FER", "BME:GAM",
-	 * "BME:GAS", "BME:GRF", "BME:IAG", "BME:IBE", "BME:ITX", "BME:IDR", "BME:MAP", "BME:TL5",
-	 * "BME:MRL", "BME:OHL", "BME:REE", "BME:REP", "BME:SCYR", "BME:TRE", "BME:TEF" };
-	 */
+	private String[] quoteNames = { "BME:ABE", "BME:ANA", "BME:ACX", "BME:ACS", "BME:AENA", "BME:AENA", "BME:AMS",
+			"BME:MTS", "BME:POP", "BME:SAB", "BME:SAN", "BME:BKIA", "BME:BKT", "BME:BBVA", "BME:CABK", "BME:DIA",
+			"BME:ENG", "BME:ELE", "BME:FCC", "BME:FER", "BME:GAM", "BME:GAS", "BME:GRF", "BME:IAG", "BME:IBE",
+			"BME:ITX", "BME:IDR", "BME:MAP", "BME:TL5", "BME:MRL", "BME:OHL", "BME:REE", "BME:REP", "BME:SCYR",
+			"BME:TRE", "BME:TEF", "NASDAQ:TSLA" };
 
-	private String[] quoteNames = { "NASDAQ:TSLA" };
+	// private String[] quoteNames = { "NASDAQ:TSLA" };
 
 	@Scheduled(fixedRate = 86400000)
 	public void extractFirstInfo() throws ParseException {
