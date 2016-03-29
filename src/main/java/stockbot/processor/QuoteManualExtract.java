@@ -7,8 +7,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -18,7 +21,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import stockbot.model.Buffers;
+import stockbot.model.Operation;
 import stockbot.model.Quote;
+import stockbot.model.Signal;
+import stockbot.model.StatsQuote;
 import stockbot.repository.QuoteRepository;
 
 @Component
@@ -94,7 +100,7 @@ public class QuoteManualExtract {
 			Quote model = new Quote();
 			model.setQuote(quote);
 			Iterator<Element> tds = trsIterator.next().select("td").iterator();
-			SimpleDateFormat df2 = new SimpleDateFormat("MMM dd, yyyy");
+			SimpleDateFormat df2 = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
 			model.setDate(df2.parse(tds.next().html()));
 			model.setOpen(Double.parseDouble(tds.next().html().replace(",", "")));
 			model.setHigh(Double.parseDouble(tds.next().html().replace(",", "")));
@@ -205,6 +211,59 @@ public class QuoteManualExtract {
 			quote.calculateRSI();
 			quote.calculateSignalRSI();
 			previousClose = quote.getClose();
+		}
+	}
+
+	public StatsQuote extractStats(String quoteName, int days) {
+		
+		
+		List<Quote> quotes = quoteRepository.findByQuoteOrderByDateAsc(quoteName);
+		
+		StatsQuote stats = createStats(quoteName, quotes.stream().filter(q ->
+			StringUtils.isNoneBlank(q.getPosition_rsi())&&StringUtils.isNoneBlank(q.getPosition_macd())
+			&&StringUtils.isNoneBlank(q.getPosition_stochastic())
+		),days);
+		
+		return stats;
+	}
+
+	private StatsQuote createStats(String quoteName, Stream<Quote> quotes, int days) {
+		StatsQuote stats = new StatsQuote();
+		stats.setQuote(quoteName);
+		
+		List<Operation> ops = new ArrayList<>();
+		
+		quotes.forEach(quote ->{
+			processQuote(quote,ops, stats, days);
+		});
+		
+		return stats;
+	}
+
+	private void processQuote(Quote quote, List<Operation> ops, StatsQuote stats, int days) {
+		if (ops.size()>=days){
+			Operation closeOp = ops.get(0);
+			if (StringUtils.indexOf(closeOp.getType().toString(), Signal.COMPRAR.toString())>-1){
+				closeOp.setProfits(closeOp.getProfits() + quote.getClose());
+			}
+			else{
+				closeOp.setProfits(closeOp.getProfits() - quote.getClose());
+			}
+			stats.addOperations(closeOp.getType(), closeOp);
+			ops.remove(0);
+		}
+		Operation op = new Operation();
+		op.setDate(quote.getDate());
+		op.setType(quote.getType());
+		if (op.getType()!=null){
+			if (StringUtils.indexOf(op.getType().toString(), Signal.COMPRAR.toString())>-1){
+				op.setProfits(quote.getClose()*-1);
+			}
+			else{
+				op.setProfits(quote.getClose());
+			}
+			stats.addOperations(quote.getType(), op);
+			ops.add(op);
 		}
 	}
 }

@@ -7,6 +7,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.gson.Gson;
 import com.sun.istack.internal.NotNull;
 
@@ -313,6 +315,50 @@ public class Quote {
 			} else {
 				this.position_rsi = Signal.NEUTRO.toString();
 			}
+		}
+	}
+
+	public StatsType getType() {
+		String positions = this.position_macd+"|"+this.position_rsi+"|"+this.position_stochastic;
+		int numBuys= StringUtils.countMatches(positions, Signal.COMPRAR.toString());
+		switch (numBuys) {
+			case 3 :
+				return StatsType.TODOS_COMPRAR;
+			case 2 :
+				int sellPos = StringUtils.indexOf(positions, Signal.VENDER.toString());
+				if (sellPos==0){
+					return StatsType.RSI_STO_COMPRAR;
+				}
+				else{
+					if (sellPos==8){
+						return StatsType.STO_MACD_COMPRAR;
+					}
+					else{
+						return StatsType.RSI_STO_COMPRAR;
+					}
+				}
+				
+			default :break;
+		}
+		int numSells= StringUtils.countMatches(positions,Signal.VENDER.toString());
+		switch (numSells) {
+			case 3 :
+				return StatsType.TODOS_VENDER;
+			case 2 :
+				int sellPos = StringUtils.indexOf(positions, Signal.COMPRAR.toString());
+				if (sellPos==0){
+					return StatsType.RSI_STO_VENDER;
+				}
+				else{
+					if (sellPos==7){
+						return StatsType.STO_MACD_VENDER;
+					}
+					else{
+						return StatsType.RSI_MACD_VENDER;
+					}
+				}
+				
+			default :return null;
 		}
 	}
 }
