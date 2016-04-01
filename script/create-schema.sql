@@ -17,7 +17,7 @@ CREATE TABLE if not exists quote (
 	average FLOAT,
 	position_stochastic VARCHAR(255),
 	ema12 FLOAT,
-	ema29 FLOAT,
+	ema26 FLOAT,
 	ema10 FLOAT,
 	macd FLOAT,
 	type_macd VARCHAR(255),

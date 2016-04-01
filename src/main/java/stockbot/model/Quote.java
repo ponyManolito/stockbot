@@ -6,11 +6,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.Gson;
-import com.sun.istack.internal.NotNull;
 
 @Entity(name = "quote")
 public class Quote {
@@ -48,7 +48,7 @@ public class Quote {
 
 	private double ema12;
 
-	private double ema29;
+	private double ema26;
 
 	private double ema10;
 
@@ -164,12 +164,12 @@ public class Quote {
 		this.ema12 = ema12;
 	}
 
-	public double getEma29() {
-		return ema29;
+	public double getEma26() {
+		return ema26;
 	}
 
-	public void setEma29(double ema29) {
-		this.ema29 = ema29;
+	public void setEma26(double ema26) {
+		this.ema26 = ema26;
 	}
 
 	public double getEma10() {
@@ -271,7 +271,7 @@ public class Quote {
 	}
 
 	public void calculateMacd() {
-		this.macd = this.ema12 - this.ema29;
+		this.macd = this.ema12 - this.ema26;
 	}
 
 	public void calculateType() {
@@ -319,46 +319,44 @@ public class Quote {
 	}
 
 	public StatsType getType() {
-		String positions = this.position_macd+"|"+this.position_rsi+"|"+this.position_stochastic;
-		int numBuys= StringUtils.countMatches(positions, Signal.COMPRAR.toString());
+		String positions = this.position_macd + "|" + this.position_rsi + "|" + this.position_stochastic;
+		int numBuys = StringUtils.countMatches(positions, Signal.COMPRAR.toString());
 		switch (numBuys) {
-			case 3 :
+			case 3:
 				return StatsType.TODOS_COMPRAR;
-			case 2 :
+			case 2:
 				int sellPos = StringUtils.indexOf(positions, Signal.VENDER.toString());
-				if (sellPos==0){
+				if (sellPos == 0) {
 					return StatsType.RSI_STO_COMPRAR;
-				}
-				else{
-					if (sellPos==8){
+				} else {
+					if (sellPos == 8) {
 						return StatsType.STO_MACD_COMPRAR;
-					}
-					else{
+					} else {
 						return StatsType.RSI_STO_COMPRAR;
 					}
 				}
-				
-			default :break;
+
+			default:
+				break;
 		}
-		int numSells= StringUtils.countMatches(positions,Signal.VENDER.toString());
+		int numSells = StringUtils.countMatches(positions, Signal.VENDER.toString());
 		switch (numSells) {
-			case 3 :
+			case 3:
 				return StatsType.TODOS_VENDER;
-			case 2 :
+			case 2:
 				int sellPos = StringUtils.indexOf(positions, Signal.COMPRAR.toString());
-				if (sellPos==0){
+				if (sellPos == 0) {
 					return StatsType.RSI_STO_VENDER;
-				}
-				else{
-					if (sellPos==7){
+				} else {
+					if (sellPos == 7) {
 						return StatsType.STO_MACD_VENDER;
-					}
-					else{
+					} else {
 						return StatsType.RSI_MACD_VENDER;
 					}
 				}
-				
-			default :return null;
+
+			default:
+				return null;
 		}
 	}
 }

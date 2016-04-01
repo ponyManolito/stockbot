@@ -144,7 +144,7 @@ public class QuoteManualExtract {
 			buffers.addAverages(quote.getAverage());
 			buffers.addEarnsAverage(quote.getEarns_average());
 			buffers.addEma12(quote.getClose());
-			buffers.addEma29(quote.getClose());
+			buffers.addEma26(quote.getClose());
 			buffers.addEma9(quote.getEma10());
 			buffers.addLossesAverage(quote.getLosses_average());
 			buffers.addMaxs(quote.getHigh());
@@ -159,8 +159,8 @@ public class QuoteManualExtract {
 			buffers.addMaxs(quote.getHigh());
 			buffers.addMins(quote.getLow());
 			buffers.addEma12(quote.getClose());
-			buffers.addEma29(quote.getClose());
-			if (buffers.getMaxs().size() >= 5) {
+			buffers.addEma26(quote.getClose());
+			if (buffers.getMaxs().size() >= 14) {
 				quote.setStochastic(getStochastic(getMax(buffers.getMaxs()), getMin(buffers.getMins()),
 						quote.getClose()));
 				buffers.addAverages(quote.getStochastic());
@@ -175,8 +175,8 @@ public class QuoteManualExtract {
 			if (buffers.getEma12().size() >= 12) {
 				quote.setEma12(getAverage(buffers.getEma12(), 12));
 			}
-			if (buffers.getEma29().size() >= 29) {
-				quote.setEma29(getAverage(buffers.getEma29(), 29));
+			if (buffers.getEma26().size() >= 26) {
+				quote.setEma26(getAverage(buffers.getEma26(), 26));
 				quote.calculateMacd();
 				buffers.addEma9(quote.getMacd());
 			}
@@ -215,38 +215,38 @@ public class QuoteManualExtract {
 	}
 
 	public StatsQuote extractStats(String quoteName, int days) {
-		
-		
+
 		List<Quote> quotes = quoteRepository.findByQuoteOrderByDateAsc(quoteName);
-		
-		StatsQuote stats = createStats(quoteName, quotes.stream().filter(q ->
-			StringUtils.isNoneBlank(q.getPosition_rsi())&&StringUtils.isNoneBlank(q.getPosition_macd())
-			&&StringUtils.isNoneBlank(q.getPosition_stochastic())
-		),days);
-		
+
+		StatsQuote stats = createStats(
+				quoteName,
+				quotes.stream().filter(
+						q -> StringUtils.isNoneBlank(q.getPosition_rsi())
+								&& StringUtils.isNoneBlank(q.getPosition_macd())
+								&& StringUtils.isNoneBlank(q.getPosition_stochastic())), days);
+
 		return stats;
 	}
 
 	private StatsQuote createStats(String quoteName, Stream<Quote> quotes, int days) {
 		StatsQuote stats = new StatsQuote();
 		stats.setQuote(quoteName);
-		
+
 		List<Operation> ops = new ArrayList<>();
-		
-		quotes.forEach(quote ->{
-			processQuote(quote,ops, stats, days);
+
+		quotes.forEach(quote -> {
+			processQuote(quote, ops, stats, days);
 		});
-		
+
 		return stats;
 	}
 
 	private void processQuote(Quote quote, List<Operation> ops, StatsQuote stats, int days) {
-		if (ops.size()>=days){
+		if (ops.size() >= days) {
 			Operation closeOp = ops.get(0);
-			if (StringUtils.indexOf(closeOp.getType().toString(), Signal.COMPRAR.toString())>-1){
+			if (StringUtils.indexOf(closeOp.getType().toString(), Signal.COMPRAR.toString()) > -1) {
 				closeOp.setProfits(closeOp.getProfits() + quote.getClose());
-			}
-			else{
+			} else {
 				closeOp.setProfits(closeOp.getProfits() - quote.getClose());
 			}
 			stats.addOperations(closeOp.getType(), closeOp);
@@ -255,11 +255,10 @@ public class QuoteManualExtract {
 		Operation op = new Operation();
 		op.setDate(quote.getDate());
 		op.setType(quote.getType());
-		if (op.getType()!=null){
-			if (StringUtils.indexOf(op.getType().toString(), Signal.COMPRAR.toString())>-1){
-				op.setProfits(quote.getClose()*-1);
-			}
-			else{
+		if (op.getType() != null) {
+			if (StringUtils.indexOf(op.getType().toString(), Signal.COMPRAR.toString()) > -1) {
+				op.setProfits(quote.getClose() * -1);
+			} else {
 				op.setProfits(quote.getClose());
 			}
 			stats.addOperations(quote.getType(), op);
