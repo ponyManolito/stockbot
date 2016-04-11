@@ -1,5 +1,6 @@
 package stockbot.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -13,7 +14,12 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
 
 @Entity(name = "quote")
-public class Quote {
+public class Quote implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7538694379945133767L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)

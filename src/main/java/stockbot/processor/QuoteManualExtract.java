@@ -8,7 +8,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,15 +25,20 @@ import org.springframework.stereotype.Component;
 import stockbot.model.Buffers;
 import stockbot.model.Operation;
 import stockbot.model.Quote;
+import stockbot.model.QuoteTypes;
 import stockbot.model.Signal;
 import stockbot.model.StatsQuote;
 import stockbot.repository.QuoteRepository;
+import stockbot.repository.QuoteTypesRepository;
 
 @Component
 public class QuoteManualExtract {
 
 	@Autowired
 	private QuoteRepository quoteRepository;
+
+	@Autowired
+	private QuoteTypesRepository quoteTypesRepository;
 
 	private final String server = "https://www.google.com";
 
@@ -112,7 +119,7 @@ public class QuoteManualExtract {
 		return quotes;
 	}
 
-	public void extractLast(String quoteName, String qCode) throws ParseException {
+	public int extractLast(String quoteName, String qCode) throws ParseException {
 		try {
 			String stockPage = server + "/finance/historical?q=" + qCode;
 			Document doc = Jsoup.connect(stockPage).post();
@@ -128,14 +135,16 @@ public class QuoteManualExtract {
 					toSave.add(quote);
 				}
 			}
-			quoteRepository.save(quotes);
+			quoteRepository.save(toSave);
+			return toSave.size();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return -1;
 	}
 
-	public void indicatorsCalulationLast(String quoteName) {
-		List<Quote> quotes = quoteRepository.findByQuoteOrderByDateAsc(quoteName, new PageRequest(0, 27));
+	public void indicatorsCalulationLast(String quoteName, int news) {
+		List<Quote> quotes = quoteRepository.findByQuoteOrderByDateAsc(quoteName, new PageRequest(0, 26 + news));
 		List<Quote> newQuotes = new ArrayList<>();
 		newQuotes.add(quotes.get(quotes.size() - 1));
 		quotes.remove(quotes.size() - 1);
@@ -151,6 +160,7 @@ public class QuoteManualExtract {
 			buffers.addMins(quote.getLow());
 		}
 		operations(newQuotes, buffers);
+		quoteRepository.save(newQuotes);
 	}
 
 	private void operations(List<Quote> quotes, Buffers buffers) {
@@ -264,5 +274,16 @@ public class QuoteManualExtract {
 			stats.addOperations(quote.getType(), op);
 			ops.add(op);
 		}
+	}
+
+	public Set<QuoteTypes> getStrategies(String quoteCode) {
+		return this.quoteTypesRepository.findByQuote(quoteCode).parallelStream().collect(Collectors.toSet());
+	}
+
+	public void saveStrategies(Map<String, Set<QuoteTypes>> mapBestStrategies) {
+		mapBestStrategies.forEach((k, v) -> {
+			this.quoteTypesRepository.save(v);
+		});
+
 	}
 }

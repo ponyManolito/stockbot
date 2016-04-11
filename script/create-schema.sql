@@ -30,3 +30,12 @@ CREATE TABLE if not exists quote (
 	position_rsi VARCHAR(255),
 	INDEX (quote,date)
 );
+
+drop table if exists quote_types;
+
+CREATE TABLE if not exists quote_types (
+	id INT(8) AUTO_INCREMENT PRIMARY KEY,
+	quote VARCHAR(255) NOT NULL,
+	oscilator VARCHAR(255) NOT NULL,
+	INDEX (quote,oscilator)
+);
