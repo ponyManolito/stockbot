@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -18,7 +19,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
@@ -28,17 +28,10 @@ import stockbot.model.Quote;
 import stockbot.model.QuoteTypes;
 import stockbot.model.Signal;
 import stockbot.model.StatsQuote;
-import stockbot.repository.QuoteRepository;
-import stockbot.repository.QuoteTypesRepository;
+import stockbot.repository.AppModel;
 
 @Component
-public class QuoteManualExtract {
-
-	@Autowired
-	private QuoteRepository quoteRepository;
-
-	@Autowired
-	private QuoteTypesRepository quoteTypesRepository;
+public class QuoteManualExtract extends AppModel {
 
 	private final String server = "https://www.google.com";
 
@@ -144,17 +137,19 @@ public class QuoteManualExtract {
 	}
 
 	public void indicatorsCalulationLast(String quoteName, int news) {
-		List<Quote> quotes = quoteRepository.findByQuoteOrderByDateAsc(quoteName, new PageRequest(0, 26 + news));
+		List<Quote> quotes = quoteRepository.findByQuoteOrderByDateDesc(quoteName, new PageRequest(0, 26 + news));
 		List<Quote> newQuotes = new ArrayList<>();
-		newQuotes.add(quotes.get(quotes.size() - 1));
-		quotes.remove(quotes.size() - 1);
+		newQuotes.add(quotes.get(0));
+		quotes.remove(0);
+		Collections.reverse(quotes);
 		Buffers buffers = new Buffers();
 		for (Quote quote : quotes) {
+			buffers.addAverages(quote.getAverage());
 			buffers.addAverages(quote.getAverage());
 			buffers.addEarnsAverage(quote.getEarns_average());
 			buffers.addEma12(quote.getClose());
 			buffers.addEma26(quote.getClose());
-			buffers.addEma9(quote.getEma10());
+			buffers.addEma10(quote.getEma10());
 			buffers.addLossesAverage(quote.getLosses_average());
 			buffers.addMaxs(quote.getHigh());
 			buffers.addMins(quote.getLow());
@@ -188,7 +183,7 @@ public class QuoteManualExtract {
 			if (buffers.getEma26().size() >= 26) {
 				quote.setEma26(getAverage(buffers.getEma26(), 26));
 				quote.calculateMacd();
-				buffers.addEma9(quote.getMacd());
+				buffers.addEma10(quote.getMacd());
 			}
 			if (buffers.getEma10().size() >= 10) {
 				quote.setEma10(getAverage(buffers.getEma10(), 10));

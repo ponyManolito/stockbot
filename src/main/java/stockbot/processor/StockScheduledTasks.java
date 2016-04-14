@@ -1,14 +1,10 @@
 package stockbot.processor;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.ParseException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -18,6 +14,7 @@ import stockbot.model.Operation;
 import stockbot.model.QuoteTypes;
 import stockbot.model.StatsQuote;
 import stockbot.model.StatsType;
+import stockbot.recommendator.QuoteRecommendator;
 
 @Component
 @Transactional
@@ -25,6 +22,9 @@ public class StockScheduledTasks {
 
 	@Autowired
 	private QuoteManualExtract extractor;
+
+	@Autowired
+	private QuoteRecommendator recommendator;
 
 	private String[] quoteNames = { "BME:ABE", "BME:ANA", "BME:ACX", "BME:ACS", "BME:AENA", "BME:AENA", "BME:AMS",
 			"BME:MTS", "BME:POP", "BME:SAB", "BME:SAN", "BME:BKIA", "BME:BKT", "BME:BBVA", "BME:CABK", "BME:DIA",
@@ -34,32 +34,32 @@ public class StockScheduledTasks {
 
 	// private String[] quoteNames = { "NASDAQ:TSLA" };
 
-	/*
-	 * @Scheduled(fixedRate = 86400000) public void extractFirstInfo() throws ParseException { for
-	 * (String quote : quoteNames) { extractor.extract(quote.split(":")[1], quote);
-	 * System.out.println("Finish load!!!"); extractor.indicatorsCalulation(quote.split(":")[1]);
-	 * System.out.println("Finish stochastic calculation!!!"); } }
-	 */
-
 	@Scheduled(fixedRate = 86400000)
-	public void extractStats() throws ParseException, IOException {
-		Map<String, Set<QuoteTypes>> mapBestStrategies = new HashMap<>();
+	public void extractFirstInfo() throws ParseException {
 		for (String quote : quoteNames) {
-			String quoteCode = quote.split(":")[1];
-			mapBestStrategies.put(quoteCode, extractor.getStrategies(quoteCode)); //
-			extractor.extractStats(quoteCode, 5);
-			StringBuilder stats = new StringBuilder();
-			stats.append(writeStats(quoteCode, 1, mapBestStrategies));
-			stats.append(writeStats(quoteCode, 2, mapBestStrategies));
-			stats.append(writeStats(quoteCode, 3, mapBestStrategies));
-			stats.append(writeStats(quoteCode, 4, mapBestStrategies));
-			stats.append(writeStats(quoteCode, 5, mapBestStrategies));
-			File file = new File("/home/ivange/Documentos/stats/" + quoteCode + ".txt");
-			FileUtils.writeStringToFile(file, stats.toString());
-			System.out.println("Finish  " + quoteCode);
+			String qName = quote.split(":")[1];
+			/*
+			 * extractor.extract(qName, quote); System.out.println("Finish load!!!");
+			 * extractor.indicatorsCalulation(qName);
+			 * System.out.println("Finish stochastic calculation!!!"); //
+			 */
+			System.out.println(recommendator.createRecomendation(qName));
 		}
-		extractor.saveStrategies(mapBestStrategies);
 	}
+
+	/*
+	 * @Scheduled(fixedRate = 86400000) public void extractStats() throws ParseException,
+	 * IOException { Map<String, Set<QuoteTypes>> mapBestStrategies = new HashMap<>(); for (String
+	 * quote : quoteNames) { String quoteCode = quote.split(":")[1];
+	 * mapBestStrategies.put(quoteCode, extractor.getStrategies(quoteCode)); //
+	 * extractor.extractStats(quoteCode, 5); StringBuilder stats = new StringBuilder();
+	 * stats.append(writeStats(quoteCode, 1, mapBestStrategies)); stats.append(writeStats(quoteCode,
+	 * 2, mapBestStrategies)); stats.append(writeStats(quoteCode, 3, mapBestStrategies));
+	 * stats.append(writeStats(quoteCode, 4, mapBestStrategies)); stats.append(writeStats(quoteCode,
+	 * 5, mapBestStrategies)); File file = new File("/home/ivange/Documentos/stats/" + quoteCode +
+	 * ".txt"); FileUtils.writeStringToFile(file, stats.toString()); System.out.println("Finish  " +
+	 * quoteCode); } extractor.saveStrategies(mapBestStrategies); }
+	 */
 
 	private String writeStats(String quote, int days, Map<String, Set<QuoteTypes>> mapBestStrategies) {
 		StatsQuote stats = extractor.extractStats(quote, days);
@@ -96,11 +96,14 @@ public class StockScheduledTasks {
 	}
 
 	/*
-	 * @Scheduled(fixedRate = 86400000) public void extractEveryDayInfo() throws ParseException {
-	 * for (String quote : quoteNames) { int news = extractor.extractLast(quote.split(":")[1],
-	 * quote); System.out.println("Finish load!!!"); if (news > 0) {
-	 * extractor.indicatorsCalulationLast(quote.split(":")[1], news);
-	 * System.out.println("Finish stochastic calculation!!!"); } } }
+	 * @Scheduled(fixedRate = 86400000) public void extractEveryDayInfo() throws ParseException { //
+	 * StringBuilder recommendation = new StringBuilder(""); for (String quote : quoteNames) {
+	 * String qName = quote.split(":")[1]; int news = extractor.extractLast(qName, quote);
+	 * System.out.println("Finish load!!!"); if (news > 0) {
+	 * extractor.indicatorsCalulationLast(qName, news);
+	 * System.out.println("Finish stochastic calculation!!!"); } //
+	 * recommendation.append(recommendator.createRecomendation(qName)); } //
+	 * System.out.println(recommendation.toString()); }
 	 */
 
 }

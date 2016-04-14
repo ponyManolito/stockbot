@@ -81,7 +81,7 @@ public class Buffers {
 		return ema10;
 	}
 
-	public void addEma9(Double ema10) {
+	public void addEma10(Double ema10) {
 		this.ema10.add(ema10);
 		if (this.ema10.size() > 10) {
 			this.ema10.remove(0);
